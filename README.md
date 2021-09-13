@@ -9,7 +9,7 @@
   * Openpyxl:
   * Pynput
 * Pip command: pip install selenium openpyxl pynput (Run this command in the command prompt/ terminal)
-* Steps to install Chrome Driver:
+* Steps to install ChromeDriver:
   * Open Chrome browser and paste in this url chrome://settings/help . You will get the version of Chrome you are using.
   * Then, go to this website https://chromedriver.chromium.org/downloads , choose your chrome version and download the file according to your OS.
   * Extract the zip folder and place the file in the same folder in which the python scripts are.
@@ -19,4 +19,4 @@
  * Then, run the file setup.py
  * Now, you can run the main file i.e. ZoomoBot.py
  * Tutorial on how to run python file: https://youtu.be/Qi28uPKaH_A?t=173
-## I hope ZoomoBot will be helpful. Incase of any feedback, please fill up this form: https://forms.gle/ib2ZRL1XiyRpCWmv9
+### I hope ZoomoBot will be helpful. Incase of any feedback, please fill up this form: https://forms.gle/ib2ZRL1XiyRpCWmv9
