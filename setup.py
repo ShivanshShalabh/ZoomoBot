@@ -1,5 +1,6 @@
 import re
 import os
+import sys
 
 
 def isValidHexaCode(str):
@@ -24,7 +25,17 @@ def isValidHexaCode(str):
 
 
 if __name__ == '__main__':
+    # Check if os is windows
+    if os.name == 'nt':
+        excecutable_file = 'chromedriver.exe'
+    else:
+        excecutable_file = 'chromedriver'
     # Check if file with name Cache.txt exists
+    if not os.path.isfile(excecutable_file):
+        print("Error: Make sure ChromeDriver is downloaded and the",
+              excecutable_file, "is in the folder")
+        print("To download the file, visit https://chromedriver.chromium.org/downloads")
+        sys.exit()
     if os.path.isfile('Cache.txt'):
         # If file exists, delete it
         os.remove('Cache.txt')

@@ -230,7 +230,12 @@ if __name__ == '__main__':
 
     print("Mr. ZoomoBot  is joining the meeting, please ask the host to allow him in case waiting room is enabled.")
     # Joinig the meeting using selenium
-    web = webdriver.Chrome()
+    #Check if os is windows or linux/mac
+    if os.name == 'nt':
+        exceutable_path = 'chromedriver.exe'
+    else:
+        executable_path = 'chromedriver'
+    web = webdriver.Chrome(executable_path=executable_path)
     web.get(meeting_link)
     web.maximize_window()
     if joining_option == '2':
