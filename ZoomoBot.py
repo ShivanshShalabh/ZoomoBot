@@ -1,4 +1,5 @@
 # Author: Shivansh Shalabh
+# Github Link: https://github.com/ShivanshShalabh/ZoomoBot
 
 # Importing module (Installation required - Selenium, Openpyxl, Pynput)
 from selenium import webdriver
@@ -34,6 +35,49 @@ def isValidHexaCode(str):
     else:
         return False
 
+# Function to extract names from txt file
+
+
+def get_name_txt(temp_file_name):
+    name_list_lst = os.listdir('Name List')
+    name_lst_file_name = ""
+    to_remove = []
+    for i in name_list_lst:
+        if i.endswith('.txt') == False:
+            to_remove.append(i)
+    for i in to_remove:
+        name_list_lst.remove(i)
+    if not name_list_lst:
+        print("No txt file was found :(")
+        print(
+            "Enter 1 to get just the name of all participants.", "Enter 2 to to get names from excel file", "Enter 3 to exit", sep="\n")
+        choice = input("Enter your choice: ")
+        while choice not in ['1', '2', '3']:
+            choice = input(
+                "Enter 1 to get just the name of all participants.", "Enter 2 to exit", sep="\n")
+        if choice == '1':
+            print("The names of participants will be saved in a txt file with the name as",
+                  temp_file_name, "in the current working directory.")
+            return 0
+        elif choice == '2':
+            return -1
+        else:
+            print("Thank you for using Zoomobot")
+            sys.exit()
+    if len(name_list_lst) == 1:
+        name_lst_file_name = name_list_lst[0]
+    else:
+        print("Choose the file: ")
+        for i in name_list_lst:
+            print('\t', name_list_lst.index(i)+1, 'for', i)
+        file_index = int(input("Your choice: "))
+        while not file_index and file_index.isdigit() and int(file_index) in range(0, len(name_list_lst)):
+            file_index = int(input())
+        name_lst_file_name = name_list_lst[file_index-1]
+    name_lst_txt = open('Name List/'+name_lst_file_name, 'r+')
+    lst_str = name_lst_txt.read()
+    name_lst_txt.close()
+    return lst_str
 
 # Function to extract names form excel file
 
@@ -53,7 +97,7 @@ def get_name_xl(temp_file_name, column_skip=1, row_skip=1):
     if not name_list_lst:
         print("No Excel file was found :(")
         print(
-            "Enter 1 to get just the name of all participants.", "Enter 2 to exit", sep="\n")
+            "Enter 1 to get just the name of all participants.", "Enter 2 to to get names from txt file", "Enter 3 to exit", sep="\n")
         choice = input("Enter your choice: ")
         while choice not in ['1', '2', '3']:
             choice = input(
@@ -63,6 +107,8 @@ def get_name_xl(temp_file_name, column_skip=1, row_skip=1):
                   temp_file_name, "in the current working directory.")
             return 0
         elif choice == '2':
+            return -1
+        else:
             print("Thank you for using Zoomobot")
             sys.exit()
     if len(name_list_lst) == 1:
@@ -141,6 +187,8 @@ def format_all_txt(file_name):
 if __name__ == '__main__':
     print("🤖   Welcome to ZoomoBot   🤖")
 
+    if not os.path.isdir("Attendance/"):
+        os.mkdir("Attendance/")
     temp_file_name = str(datetime.now())+'.txt'
     # Getting details required to join the meeting
     joining_option = input(
@@ -170,77 +218,106 @@ if __name__ == '__main__':
 
     while not name:
         name = input("Enter name to join the meeting: ")
-    nested_folder = input("Enter the meeting title: ")
-    while not nested_folder:
-        nested_folder = input("Enter the meeting title: ")
 
+    # Generating folders where the files will be saved
+    parent_folder_path = "Attendance/" + \
+        ".".join(reversed((str(date.today()).split("-"))))
+    if not os.path.isdir(parent_folder_path):
+        os.mkdir(parent_folder_path)
+    nested_folder = input("Enter the meeting title: ")
+    folder_path = parent_folder_path + '/'+nested_folder+'/'
+    while os.path.isdir(folder_path):
+        print("Data related to this meeting is already there, please enter any other meeting title to avoid the pre existing record to be destroyed: ")
+        choice = input("Do you want to overwrite? (y/n): ")
+        while not choice:
+            choice = input("Do you want to overwrite? (y/n): ")
+        if choice == 'y':
+            break
+        else:
+            nested_folder = input("Enter the meeting title: ")
+        folder_path = parent_folder_path + '/'+nested_folder+'/'
+    else:
+        os.mkdir(folder_path)
     print("Do you want to filter the participants? (Enter -1 to skip)", "Enter 1 to consider only participants who have raised their hand",
           "Enter 2 to consider only the participatns who are connected to audio", "Enter 3 to consider only participants who are connected to audio as well as whose hands are raised.", sep="\n")
     filter = input("You choice: ")
     while filter not in ['-1', '1', '2', '3']:
         filter = input("Invalid choice :(\nYou choice: ")
     # Fetching data from namelist
+    print("From where do you want to get the name?",
+          "Enter 1 to get it from an excel file", "Enter 2 to get it from a txt file", sep="\n")
+    name_source = input("Your choice: ")
+    while name_source not in ['1', '2']:
+        name_source = input("Invalid choice :(\nYour choice: ")
     lst_str = ""
     xl_file = ""
     get_only_name = False
     while not lst_str:
-        try:
-            with open('Cache.txt', 'r') as f:
-                f.readline()
-                first_line = f.readline()
-                first_line.replace(" ", "")
-                second_line = f.readline()
-                second_line.replace(" ", "")
-                column_skip = first_line.split("|")[0]
-                color = f.readline().split("|")[0]
-                color.replace(" ", "")
-                cell_color = color
-                while not column_skip.isdigit() or not column_skip:
-                    column_skip = input(
-                        "Enter the column number to skip: ")
+        if name_source == '1':
+            try:
+                with open('Cache.txt', 'r') as f:
+                    f.readline()
+                    first_line = f.readline()
+                    first_line.replace(" ", "")
+                    second_line = f.readline()
+                    second_line.replace(" ", "")
+                    column_skip = first_line.split("|")[0]
+                    color = f.readline().split("|")[0]
+                    color.replace(" ", "")
+                    cell_color = color
+                    while not column_skip.isdigit() or not column_skip:
+                        column_skip = input(
+                            "Enter the column number to skip: ")
 
-                row_skip = first_line.split("|")[0]
-                while not row_skip.isdigit() or not row_skip:
-                    row_skip = input(
-                        "Enter the column number to skip: ")
-                while not isValidHexaCode(cell_color):
-                    cell_color = input(
-                        "Enter the color of the cell (Enter -1 to skip): ")
-                    if cell_color == '-1':
-                        cell_color = ''
-                        break
-                column_skip, row_skip = int(column_skip), int(row_skip)
-        except:
-            print("Unable to get data, please fill in the details manually.")
-            column_skip = input("Enter the column number to skip: ")
-            while not column_skip.isdigit():
+                    row_skip = first_line.split("|")[0]
+                    while not row_skip.isdigit() or not row_skip:
+                        row_skip = input(
+                            "Enter the column number to skip: ")
+                    while not isValidHexaCode(cell_color):
+                        cell_color = input(
+                            "Enter the color of the cell (Enter -1 to skip): ")
+                        if cell_color == '-1':
+                            cell_color = ''
+                            break
+                    column_skip, row_skip = int(column_skip), int(row_skip)
+            except:
+                print("Unable to get data, please fill in the details manually.")
                 column_skip = input("Enter the column number to skip: ")
-            column_skip = int(column_skip)
-            row_skip = input("Enter the row number to skip: ")
-            while not row_skip.isdigit():
+                while not column_skip.isdigit():
+                    column_skip = input("Enter the column number to skip: ")
+                column_skip = int(column_skip)
                 row_skip = input("Enter the row number to skip: ")
-            row_skip = int(row_skip)
-        xl_return = get_name_xl(temp_file_name, column_skip, row_skip)
-        if xl_return == 0:
-            get_name_only = True
-            break
-        else:
-            lst_str = xl_return[0]
-            xl_file = xl_return[1]
+                while not row_skip.isdigit():
+                    row_skip = input("Enter the row number to skip: ")
+                row_skip = int(row_skip)
 
-    print("Mr. ZoomoBot  is joining the meeting, please ask the host to allow him in case waiting room is enabled.")
+            xl_return = get_name_xl(temp_file_name, column_skip, row_skip)
+            if xl_return == -1:
+                name_source = '2'
+            elif xl_return == 0:
+                get_name_only = True
+                break
+            else:
+                lst_str = xl_return[0]
+                xl_file = xl_return[1]
+
+        elif name_source == '2':
+            txt_return = get_name_txt(temp_file_name)
+
+            if txt_return == -1:
+                name_source = '1'
+            elif txt_return == 0:
+                get_name_only = True
+                break
+            else:
+                lst_str = txt_return
+    print("Mr. ZoomoBot 👨‍💻 is joining the meeting, please ask the host to allow him in case waiting room is enabled.")
     # Joinig the meeting using selenium
-    #Check if os is windows or linux/mac
-    if os.name == 'nt':
-        exceutable_path = 'chromedriver.exe'
-    else:
-        executable_path = 'chromedriver'
-    web = webdriver.Chrome(executable_path=executable_path)
+    web = webdriver.Chrome()
     web.get(meeting_link)
-    web.maximize_window()
     if joining_option == '2':
         keyboard = Controller()
-        for _ in range(3):
+        for _ in range(5):
             check = 0
             sleep(1)
             keyboard.press(Key.esc)
@@ -259,10 +336,13 @@ if __name__ == '__main__':
         join_from_browser = web.find_element_by_xpath(
             '//*[@id="zoom-ui-frame"]/div[2]/div/div[2]/h3[2]/span/a')
         join_from_browser.click()
-    web.maximize_window()
+
     name_input = web.find_element_by_id('inputname')
     name_input.send_keys(name)
     name_join_btn = web.find_element_by_xpath('//*[@id="joinBtn"]')
+    web.execute_script("""document.getElementById("video-btn").click();
+    document.getElementById("mic-btn").click();""")
+    sleep(1)
     name_join_btn.click()
     if joining_option == '1':
         password_input = web.find_element_by_id('inputpasscode')
@@ -282,6 +362,7 @@ if __name__ == '__main__':
         document.getElementsByClassName('footer')[0].classList.remove("footer--hidden");
         document.getElementsByClassName("footer-button__button ax-outline")[0].click();
     """)
+
             break
         except:
             check += 1
@@ -289,16 +370,12 @@ if __name__ == '__main__':
                 choice = input("Are you in the meeting (y/n): ")
                 while not choice.lower() in ['y', 'n']:
                     choice = input("Are you in the meeting (y/n): ")
-                if choice .lower() == 'y':
-                    check_str = input(
-                        "Not able to open the participant's list, please open the participant's panel and then enter any non-empty string: ")
-                    while not check_str:
-                        check_str = input(
-                            "Not able to open the participant's list, please open the participant's panel and then enter any non-empty string: ")
-                    break
+                    if choice .lower() == 'y':
+                        break
+
             print("Joining the meeting.\nIf waiting room is enabled, please ask the host to let me in the meeting.")
             sleep(5)
-    print("Thank you for your patience, Mr. ZoomoBot is now in the meeting.")
+    print("Thank you for your patience, Mr. ZoomoBot 😎 is now in the meeting.")
     sleep(5)
     selenium_name_lst = ""
     check = 0
@@ -306,14 +383,23 @@ if __name__ == '__main__':
         try:
             web.execute_script("""
         let participant_bot_list = document.getElementById('participants-ul');
-        for (let i of participant_bot_list.children) {
-            i.style.backgroundColor = '#66ff69 !important';
-            i.children[0].children[0].children[0].setAttribute('style', 'display:none'); //profile
-            i.children[0].children[0].children[1].setAttribute('style', 'font-size: 0.1px;'); //fontsize of name
-            i.setAttribute('style', 'height: 0.1px;'); //li height
-            i.children[0].children[1].setAttribute('style', 'display: none;'); // icons
-            i.children[0].children[0].children[1].children[0].classList.add('bot_participant_name');
-        }   
+for (let i of participant_bot_list.children) {
+    i.style.backgroundColor = '#66ff69 !important';
+    if (i.children[0].children[0].children[0] != undefined)
+        i.children[0].children[0].children[0].setAttribute('style', 'display:none'); //profile
+    if (i.children[0].children[0].children[1] != undefined)
+        i.children[0].children[0].children[1].setAttribute('style', 'font-size: 0.1px;'); //fontsize of name
+    i.setAttribute('style', 'height: 0.1px;'); //li height
+    if (i.children[0].children[1] != undefined)
+        i.children[0].children[1].setAttribute('style', 'display: none;'); // icons
+    i.children[0].children[0].children[1].children[0].classList.add('bot_participant_name');
+}
+
+for (let i of participant_bot_list.children) {
+    console.log(i.children[0].children[0].children[1].children[0].innerText);
+}
+
+   
        """)
 
             selenium_name_lst = web.find_elements_by_class_name(
@@ -323,14 +409,18 @@ if __name__ == '__main__':
             check += 1
             sleep(2)
             if check == 7:
-                while not input("Unable to find the participant's list. Make sure the participants' panel is open and then input any non-empty string: "):
+                while not input("Unable to find the participant's list. Make sure the participant list is open and then input any non-empty string."):
                     pass
+                break
     all_participant = []
     unknown = []
     present = []
     sleep(1)
     for name in selenium_name_lst:
         all_participant.append(name.text)
+    all_participant_txt_content = "All participants:"
+    for i in range((len(all_participant))):
+        all_participant_txt_content += "\n"+str(i+1)+". "+all_participant[i]
     temp_file = open(temp_file_name, 'w')
     temp_file.write("All participants:\n"+("\n".join(all_participant)))
     temp_file.close()
@@ -353,6 +443,13 @@ if __name__ == '__main__':
             duplicate_first_names.append(namelst[i][0])
     attendance_data = "Total no. of students: "+str(len(namelst))
 
+    # Creating all.txt with names of all the participants
+    all_participant_txt_without_filter = open(
+        folder_path+"all_without_filter.txt", 'w')
+    all_participant_txt_without_filter.write(
+        "All participants:\n"+("\n".join(all_participant)))
+    all_participant_txt_without_filter.close()
+    format_all_txt(folder_path+'all_without_filter.txt')
     # Filtering participants
     if filter == '1':
         # HandRaised
@@ -421,14 +518,18 @@ if __name__ == '__main__':
         except:
             print("Please open Participants Panel")
             sleep(2)
-    print("Going through the participants' list")
+    print("Going through the participants' list 🕵")
     if filter != '-1':
         all_participant = []
         selenium_name_lst = web.find_elements_by_class_name(
             'bot_verified_success')
         for name in selenium_name_lst:
             all_participant.append(name.text)
-
+        all_participant_txt = open(folder_path+"all_after_filter.txt", 'w')
+        all_participant_txt.write(
+            "All participants:\n"+("\n".join(all_participant)))
+        all_participant_txt.close()
+        format_all_txt(folder_path+'all_without_filter.txt')
     for i in all_participant:
         i = i.lower()
         while(i.find("  ") != -1):
@@ -453,19 +554,59 @@ if __name__ == '__main__':
         if not known:
             unknown.append(i)
     raw_present = list(present)
+    # Formatting the names
+    for i in range(len(namelst)):
+        name = str(i+1)+". "
+        for k in namelst[i]:
+            name += (k.capitalize() + " ")
+        namelst[i] = name
+    for i in range(len(present)):
+        present[i] = present[i].split(" ")
+        name = str(i+1)+". "
+        for k in present[i]:
+            name += (k.capitalize() + " ")
+        present[i] = name
+    for i in range(len(unknown)):
+        unknown[i] = unknown[i].split(" ")
+        name = str(i+1)+". "
+        for k in unknown[i]:
+            name += (k.capitalize() + " ")
+        unknown[i] = name
 
+    attendance_data += "\nNo. of absentees: "+str(len(namelst))
+    attendance_data += "\nNo. of students present: "+str(len(present))
+    attendance_data += '\n'
+
+    # Creating txt files with all the data
+    absent_txt = open(folder_path+"absent.txt", 'w')
+    absent_txt.write((attendance_data+"\nAbsentees:\n"+("\n".join(namelst))))
+    absent_txt.close()
+
+    present_txt = open(folder_path+"present.txt", 'w')
+    present_txt.write(
+        (attendance_data+"\nPresent participants:\n"+("\n".join(present))))
+    present_txt.close()
+
+    unknown_txt = open(folder_path+"unknown.txt", 'w')
+    unknown_txt.write(("Unknown participants:\n"+("\n".join(unknown))))
+    unknown_txt.close()
+    print("Attendance taken successfully")
+    web.execute_script("""
+
+let participant_bot_list = document.getElementById('participants-ul');
+for (let i of participant_bot_list.children) {
+    if (i.children[0].children[0].children[0] != undefined)
+        i.children[0].children[0].children[0].removeAttribute('style');
+    if (i.children[0].children[0].children[1].removeAttribute != undefined)
+        i.children[0].children[0].children[1].removeAttribute('style');
+    i.removeAttribute('style');
+    if (i.children[0].children[1] != undefined)
+        i.children[0].children[1].removeAttribute('style');
+}
+    """)
     os.remove(temp_file_name)
     if xl_file:
         mark_xl(xl_file, raw_present, nested_folder,
                 cell_color, column_skip, row_skip)
         print("Excel File updated successfully")
     print("Thanks you for using ZoomoBot 😊")
-    web.execute_script("""
-    let participant_bot_list = document.getElementById('participants-ul');
-    for (let i of participant_bot_list.children) {
-        i.children[0].children[0].children[0].removeAttribute('style');
-        i.children[0].children[0].children[1].removeAttribute('style');
-        i.removeAttribute('style');
-        i.children[0].children[1].removeAttribute('style');
-    }
-    """)
