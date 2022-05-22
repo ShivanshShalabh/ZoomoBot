@@ -16,4 +16,4 @@
  * Then, run the file setup.py
  * Now, you can run the main file.
  * Tutorial on how to run python file: https://youtu.be/Qi28uPKaH_A?t=173
-### I hope ZoomoBot will be helpful. Incase of any feedback, raise an issue request on github and I will be happy to help you out :)
+### I hope ZoomoBot will be helpful. Feel free to reach out to me at shalabhshivansh@gmail.com with any issue you face or if you wanna share your feedback :)
