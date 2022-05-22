@@ -1,5 +1,5 @@
 # Author: Shivansh Shalabh
-# Github Link: https://github.com/ShivanshShalabh/ZoomoBot
+# Github Link: https://github.com/ShivanshShalabh/ZoomoBot-The-Attendance-Bot
 
 # Importing module (Installation required - Selenium, Openpyxl, Pynput)
 from selenium import webdriver
@@ -313,7 +313,12 @@ if __name__ == '__main__':
                 lst_str = txt_return
     print("Mr. ZoomoBot 👨‍💻 is joining the meeting, please ask the host to allow him in case waiting room is enabled.")
     # Joinig the meeting using selenium
-    web = webdriver.Chrome()
+     #Check if os is windows or linux/mac
+    if os.name == 'nt':
+        exceutable_path = 'chromedriver.exe'
+    else:
+        executable_path = 'chromedriver'
+    web = webdriver.Chrome(executable_path=executable_path)
     web.get(meeting_link)
     if joining_option == '2':
         keyboard = Controller()

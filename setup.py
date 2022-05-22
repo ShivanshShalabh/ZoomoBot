@@ -35,21 +35,21 @@ if __name__ == '__main__':
         name = input('Enter your name (Enter -1 to skip): ')
     if name == '-1':
         name = ''
-    skip_column = input('Enter column number to skip: ')
+    skip_column = input('Enter column number to skip in the excel file (Enter -1 to skip): ')
     while (not skip_column or not skip_column.isdigit()) and skip_column != '-1':
         if not skip_column.isdigit():
             print("Invalid input :(\nEnter an integer")
             skip_column = ""
         skip_column = input(
-            'Enter column number to skip: ')
+            'Enter column number to skip in the excel file (Enter -1 to skip): ')
     if skip_column == '-1':
         skip_column = ''
-    skip_row = input('Enter row number to skip: ')
+    skip_row = input('Enter row number to skip in the excel file (Enter -1 to skip): ')
     while (not skip_row or not skip_row.isdigit()) and skip_row != '-1':
         if not skip_row.isdigit():
             print("Invalid input :(\nEnter an integer")
             skip_row = ""
-        skip_row = input('Enter row number to skip: ')
+        skip_row = input('Enter row number to skip in the excel file (Enter -1 to skip): ')
     if skip_row == '-1':
         skip_row = ''
     # Write name, skip_column and skip_row to Cache.txt
